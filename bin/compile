@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -e
+
+function indent() {
+  c='s/^/       /'
+  case $(uname) in
+    Darwin) sed -l "$c";;
+    *)      sed -u "$c";;
+  esac
+}
+
+unset GIT_DIR
+
+for BUILDPACK in $(cat $1/.buildpacks); do
+  dir=$(mktemp -t buildpackXXXXX)
+  rm -rf $dir
+
+  url=${BUILDPACK%#*}
+  branch=${BUILDPACK#*#}
+
+  if [ "$branch" == "$url" ]; then
+    branch=""
+  fi
+
+  if [ "$url" != "" ]; then
+    echo "=====> Downloading Buildpack: $url"
+    git clone $url $dir >/dev/null 2>&1
+    cd $dir
+
+    if [ "$branch" != "" ]; then
+      git checkout $branch >/dev/null 2>&1
+    fi
+
+    chmod +x $dir/bin/{detect,compile,release}
+
+    framework=$($dir/bin/detect $1)
+
+    if [ $? == 0 ]; then
+      echo "=====> Detected Framework: $framework"
+      $dir/bin/compile $1 $2
+
+      if [ $? != 0 ]; then
+        exit 1
+      fi
+
+      $dir/bin/release $1 > $1/last_pack_release.out
+    fi
+  fi
+done
+
+echo "Using release configuration from last framework $framework:" | indent
+cat $1/last_pack_release.out | indent
