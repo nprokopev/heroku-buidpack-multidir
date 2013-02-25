@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 
-for app_dir in $1/* 
-do
-	if [ -f $app_dir/.buildpack ]; then
-	  echo "Multipack found in $app_dir."
-	  exit 0
-	else
-	  echo "no .buildpack file in $app_dir, skipping."
-	  exit 1
-	fi
-done
+if [ -f $1/.buildpacks ]; then
+echo "Multipack"
+  exit 0
+else
+echo "no .buildpacks file"
+  exit 1
+fi
