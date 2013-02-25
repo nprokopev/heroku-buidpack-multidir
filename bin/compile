@@ -10,14 +10,18 @@ function indent() {
   esac
 }
 
+echo "Before unset, GIT_DIR=$GIT_DIR"
 unset GIT_DIR
+echo "After unset, GIT_DIR=$GIT_DIR"
 
 for BUILDPACK in $(cat $1/.buildpacks); do
+  echo "Found buildpack $BUILDPACK"
   dir=$(mktemp -t buildpackXXXXX)
   rm -rf $dir
-
+	
   url=${BUILDPACK%#*}
   branch=${BUILDPACK#*#}
+  echo "dir=$dir, url=$url, branch=$branch"
 
   if [ "$branch" == "$url" ]; then
     branch=""
