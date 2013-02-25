@@ -14,7 +14,7 @@ unset GIT_DIR
 
 for BUILDPACK in $(cat $1/.buildpacks); do
   dir=$(mktemp -t buildpackXXXXX)
-  rm -rf $dir
+
 	
   url=${BUILDPACK%#*}
   branch=${BUILDPACK#*#}
